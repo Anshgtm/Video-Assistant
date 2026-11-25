@@ -3,7 +3,7 @@ from langchain_groq import ChatGroq
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableLambda
-from core.vector_store import get_retriever, load_vector
+from core.vector_store import build_vector, get_retriever, load_vector
 
 def get_llm():
     llm = os.getenv("GROQ_API_KEY")
@@ -16,7 +16,7 @@ def get_llm():
 def format_docs(docs):
     return "\n\n".join([doc.page_content for doc in docs])
 def build_rag_chain(transcript:str):
-    vector_store = load_vector()
+    vector_store = build_vector(transcript)
     retriever = get_retriever(vector_store, k=4)
     llm = get_llm()
 
@@ -47,7 +47,7 @@ Context from meeting transcript:
 
 def load_rag_chain():
     vector_store = load_vector()
-    retriver = get_retriever()
+    retriver = get_retriever(vector_store, k=4)
 
     llm = get_llm()
     prompt = ChatPromptTemplate.from_messages([

@@ -10,7 +10,7 @@ EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 def get_embeddings():
     return HuggingFaceEmbeddings(
         model_name=EMBEDDING_MODEL,
-        device="cpu"
+        model_kwargs={"device": "cpu"}
         )
 def build_vector(transcript: str) -> Chroma:
     splitter = RecursiveCharacterTextSplitter(
@@ -23,6 +23,13 @@ def build_vector(transcript: str) -> Chroma:
         for i ,chunk in enumerate(chunks)
         ]
     embeddings = get_embeddings()
+    if os.path.exists(CHROME_DIR):
+        existing = Chroma(
+            persist_directory=CHROME_DIR,
+            collection_name=COLLECTION_NAME,
+            embedding_function=embeddings,
+        )
+        existing.delete_collection()
     vector_store = Chroma.from_documents(
         documents=docs,
         embedding=embeddings,
